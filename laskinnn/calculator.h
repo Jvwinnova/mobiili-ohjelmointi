@@ -9,6 +9,8 @@ class Calculator : public QObject
     Q_OBJECT
     Q_PROPERTY(QString display READ display NOTIFY displayChanged)
 
+
+
 public:
     explicit Calculator(QObject *parent = nullptr);
 

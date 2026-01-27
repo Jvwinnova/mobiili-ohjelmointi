@@ -11,7 +11,14 @@ Button {
     font.pixelSize: 16
     font.bold: true
 
-
+    // 🔹 Scale animation on press
+    scale: root.down ? 1.08 : 1.0
+    Behavior on scale {
+        NumberAnimation {
+            duration: 120
+            easing.type: Easing.OutQuad
+        }
+    }
 
     background: Rectangle {
         radius: 8

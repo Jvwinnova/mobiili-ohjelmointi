@@ -13,6 +13,7 @@ Calculator::Calculator(QObject *parent)
 {
 }
 
+
 // ---------- Display ----------
 QString Calculator::display() { return m_display; }
 

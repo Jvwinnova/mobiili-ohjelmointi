@@ -17,6 +17,7 @@ qt_add_executable(applaskinnn
     calculator.h
 )
 
+
 # ---------- QML module ----------
 qt_add_qml_module(applaskinnn
     URI laskinnn

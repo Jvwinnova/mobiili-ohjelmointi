@@ -1,12 +1,16 @@
-import QtQuick
-import QtQuick.Controls
-import QtQuick.Layouts
+import QtQuick 2.15
+import QtQuick.Controls 2.15
+import QtQuick.Layouts 1.15
+import Qt.labs.platform 1.1
 import CalculatorEnums 1.0
 
 ApplicationWindow {
     id: window
     visible: true
     title: "Laskin"
+
+    minimumWidth: 240
+    minimumHeight: 400
 
     // ---------------- Responsive base properties ----------------
     property real baseWidth: width
@@ -17,8 +21,22 @@ ApplicationWindow {
     property real displayHeight: baseHeight * 0.12
     property real drawerWidth: baseWidth * 0.65
 
-    minimumWidth: 240
-    minimumHeight: 400
+    // ---------------- Background Image ----------------
+    background: Image {
+        id: mainBackground
+        anchors.fill: parent
+        fillMode: Image.PreserveAspectCrop
+        source: "" // initially empty
+        visible: source !== "" && source !== undefined
+        z: -1
+
+        onStatusChanged: {
+            console.log("BG status:", status, "source:", source)
+            if (status === Image.Error) {
+                console.log("BG load error:", errorString)
+            }
+        }
+    }
 
     // ---------------- Drawer ----------------
     Drawer {
@@ -29,7 +47,7 @@ ApplicationWindow {
 
         Rectangle {
             anchors.fill: parent
-            color: darkModeSwitch.checked ? "#333" : "#f0f0f0"
+            color: darkModeSwitch.checked ? Qt.rgba(0,0,0,0.8) : Qt.rgba(1,1,1,0.8)
         }
 
         ColumnLayout {
@@ -54,17 +72,32 @@ ApplicationWindow {
                 Switch {
                     id: darkModeSwitch
                     checked: false
-                    onCheckedChanged: {
-                        if (checked) {
-                            window.palette.window = "#222"
-                            window.palette.windowText = "white"
-                        } else {
-                            window.palette.window = "white"
-                            window.palette.windowText = "black"
-                        }
+                }
+            }
+
+            Button {
+                text: "Set Background Image"
+                font.pixelSize: baseFontSize * 0.6
+                Layout.fillWidth: true
+                onClicked: fileDialog.open()
+            }
+
+            FileDialog {
+                id: fileDialog
+                title: "Select Background Image"
+                nameFilters: ["Images (*.png *.jpg *.jpeg *.bmp)"]
+                onAccepted: {
+                    console.log("FileDialog accepted, file:", fileDialog.file)
+                    if (fileDialog.file && fileDialog.file !== "") {
+                        mainBackground.source = fileDialog.file
+                        mainBackground.visible = true
+                        console.log("Set background source to:", fileDialog.file)
+                    } else {
+                        console.log("No valid file selected.")
                     }
                 }
             }
+
         }
     }
 
@@ -90,6 +123,7 @@ ApplicationWindow {
 
     // ---------------- Main Content ----------------
     Item {
+        id: mainContent
         anchors.fill: parent
         anchors.margins: marginSize
 
@@ -103,7 +137,7 @@ ApplicationWindow {
                 Layout.fillWidth: true
                 Layout.preferredHeight: displayHeight
                 radius: 6
-                color: darkModeSwitch.checked ? "#222" : "#eee"
+                color: darkModeSwitch.checked ? Qt.rgba(0,0,0,0.6) : Qt.rgba(1,1,1,0.6)
 
                 Text {
                     anchors.right: parent.right
