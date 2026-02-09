@@ -1,15 +1,26 @@
-import QtQuick 2.15
-import QtQuick.Controls 2.15
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Layouts
+import QtMultimedia
 import QtQuick.Dialogs
 
 ApplicationWindow {
     visible: true
-    width: 400
+    width: 420
     height: 360
     title: "Music Player"
 
-    Column {
-        anchors.centerIn: parent
+    MediaPlayer {
+        id: player
+        audioOutput: AudioOutput {
+            id: audioOut
+            volume: volumeSlider.value
+        }
+    }
+
+    ColumnLayout {
+        anchors.fill: parent
+        anchors.margins: 16
         spacing: 12
 
         Button {
@@ -17,64 +28,44 @@ ApplicationWindow {
             onClicked: fileDialog.open()
         }
 
-        Row {
+        RowLayout {
             spacing: 10
             Button { text: "Play"; onClicked: player.play() }
             Button { text: "Pause"; onClicked: player.pause() }
             Button { text: "Stop"; onClicked: player.stop() }
         }
 
-        // Progress Slider
+        // 🎵 Progress slider (Qt 6–safe)
         Slider {
-            id: progressSlider
-            width: 360
+            Layout.fillWidth: true
             from: 0
             to: player.duration
-            value: player.position
+            value: pressed ? value : player.position
 
             onMoved: {
-                if (pressed) player.position = value
-            }
-
-            Connections {
-                target: player
-                function onPositionChanged(pos) {
-                    if (!progressSlider.pressed) progressSlider.value = pos
-                }
-                function onDurationChanged(dur) {
-                    progressSlider.to = dur
-                }
+                if (pressed)
+                    player.position = value
             }
         }
 
-        // Volume Slider
-        Row {
+        // 🔊 Volume slider
+        RowLayout {
             spacing: 10
-            Text { text: "Volume"; width: 60; horizontalAlignment: Text.AlignRight }
+            Label { text: "Volume"; Layout.preferredWidth: 60 }
             Slider {
                 id: volumeSlider
-                width: 300
+                Layout.fillWidth: true
                 from: 0
                 to: 1
                 value: 0.5
-                onValueChanged: player.volume = value
             }
         }
 
-        Text {
-            id: songName
-            text: player.currentSong
-            width: parent.width
-            horizontalAlignment: Text.AlignHCenter
-            wrapMode: Text.Wrap
-        }
-
-        Text {
-            id: timeDisplay
-            text: Math.floor(player.position / 1000) + " / " +
-                  Math.floor(player.duration / 1000) + " sec"
-            width: parent.width
-            horizontalAlignment: Text.AlignHCenter
+        // ⏱ Time display
+        Label {
+            Layout.alignment: Qt.AlignHCenter
+            text: formatTime(player.position) + " / " +
+                  formatTime(player.duration)
         }
     }
 
@@ -84,28 +75,16 @@ ApplicationWindow {
         nameFilters: ["Audio files (*.mp3 *.wav *.ogg *.m4a)"]
 
         onAccepted: {
-            if (!selectedFile) {
-                console.log("No file selected")
-                return
-            }
-
-            console.log("File selected:", selectedFile)
-            player.currentSong = selectedFile
-
+            player.source = selectedFile
+            player.play()
         }
     }
 
-
-    Timer {
-        interval: 200
-        running: true
-        repeat: true
-        onTriggered: {
-            if (!progressSlider.pressed) {
-                progressSlider.value = player.position
-            }
-            timeDisplay.text = Math.floor(player.position / 1000) + " / " +
-                               Math.floor(player.duration / 1000) + " sec"
-        }
+    function formatTime(ms) {
+        if (ms <= 0) return "0:00"
+        var s = Math.floor(ms / 1000)
+        return Math.floor(s / 60) + ":" +
+               (s % 60 < 10 ? "0" : "") + (s % 60)
     }
- }
+}
+

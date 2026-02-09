@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.16)
 
 project(untitled5 VERSION 0.1 LANGUAGES CXX)
 
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Find the required Qt6 modules
@@ -24,9 +25,9 @@ qt_add_qml_module(appuntitled5
     SOURCES
         player.h
         player.cpp
-        RESOURCES android/AndroidManifest.xml
-        RESOURCES resources.qrc
-
+    RESOURCES
+        android/AndroidManifest.xml
+        resources.qrc
 )
 
 # Set properties for macOS/iOS and Windows
@@ -51,3 +52,9 @@ install(TARGETS appuntitled5
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 )
+
+# Android-specific settings
+if(ANDROID)
+    set_property(TARGET appuntitled5 APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR
+                 ${CMAKE_CURRENT_SOURCE_DIR}/android)
+endif()

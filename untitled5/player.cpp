@@ -61,3 +61,4 @@ void Player::setCurrentSong(const QString &song)
     m_player.setSource(url);
     emit currentSongChanged();
 }
+
